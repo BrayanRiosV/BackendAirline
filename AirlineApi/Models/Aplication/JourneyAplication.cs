@@ -22,19 +22,38 @@ namespace AirlineApi.Models.Aplication
         /// <returns>A list of JourneyDto objects representing sorted flight combinations.</returns>
         /// <exception cref="Exception">Thrown if an error occurs during the process.</exception>
         /// <author>Brayan Rios</author>
-        public async Task<List<JourneyDto>> GetJourneys(RequestDto request)
+        public async Task<ResultJourneyDto> GetJourneys(RequestDto request)
         {
             try
-            {
+            {                
+
                 List<FlightsApiDto> flights = await Repository.ApiFlights();
 
                 List<FlightsApiDto> originFlights = flights.Where(flight => flight.departureStation == request.Origin).ToList();
 
                 flights.RemoveAll(flight => flight.departureStation == request.Origin);
 
-                List<JourneyDto> retorno = await SortJourney(flights, originFlights, request);
+                List<JourneyDto> returnFlights = await SortJourney(flights, originFlights, request);                
 
-                return retorno;
+                if (request.Limit > 0)
+                {
+                    returnFlights = LimitFlights(returnFlights, (int)request.Limit);
+                }
+
+                ResultJourneyDto result = new ResultJourneyDto(returnFlights, "", "");
+
+                if (returnFlights.Count == 0)
+                {
+                    result.Status = "fail";
+                    result.Message = "No se han encontrado vuelos con los datos suministrados, prueba con otros.";
+                }
+                else
+                {
+                    result.Status = "success";
+                    result.Message = "Se han encontrado estos resultados";
+                }
+
+                return result;
             }
             catch (Exception)
             {
@@ -174,6 +193,41 @@ namespace AirlineApi.Models.Aplication
             }
 
         }
+
+        //// <summary>
+        /// Filters a list of JourneyDto objects based on the number of flights in each journey.
+        /// </summary>
+        /// <param name="journeys">The list of JourneyDto objects to be filtered.</param>
+        /// <param name="limit">The maximum number of flights allowed in a journey to be included in the result.</param>
+        /// <returns>
+        /// A filtered list of JourneyDto objects where each journey contains equal or fewer flights than the specified limit.
+        /// </returns>
+        /// <exception cref="Exception">Thrown if an error occurs during the process.</exception>
+        /// <author>Brayan Rios</author>
+        public List<JourneyDto> LimitFlights(List<JourneyDto> journeys, int limit) 
+        {
+
+            try
+            {
+                List<JourneyDto> returnTemp = new List<JourneyDto>();
+
+                foreach (var journey in journeys)
+                {
+                    if (journey.Flights.Count <= limit)
+                    {
+                        returnTemp.Add(journey);
+                    }
+                }
+
+                return returnTemp;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }            
+        }
+
 
 
     }

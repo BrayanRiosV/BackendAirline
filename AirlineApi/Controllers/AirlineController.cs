@@ -15,14 +15,14 @@ namespace AirlineApi.Controllers
             App = new JourneyAplication();
         }
 
-        [HttpGet("api/journey")]
-        public async Task<List<JourneyDto>> GetJourney([FromQuery] string origin, [FromQuery] string destination, [FromQuery] string limit)
+        [HttpGet("journey")]
+        public async Task<ResultJourneyDto> GetJourney([FromQuery] string origin, [FromQuery] string destination, [FromQuery] int limit)
         {
             try
             {
                 RequestDto request = new RequestDto(origin, destination, limit);
 
-                List<JourneyDto> result = await App.GetJourneys(request);
+                ResultJourneyDto result = await App.GetJourneys(request);
 
                 return result;
             }

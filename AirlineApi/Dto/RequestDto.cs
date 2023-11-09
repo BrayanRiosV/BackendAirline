@@ -11,9 +11,9 @@ namespace AirlineApi.Dto
         public string Destination { get; set; }
 
         [JsonPropertyName("limit")]
-        public string Limit { get; set; }
+        public int? Limit { get; set; }
 
-        public RequestDto(String? Origin, String? Destination, String? Limit)
+        public RequestDto(String? Origin, String? Destination,  int Limit)
         {
             this.Origin = Origin;
             this.Destination = Destination;
